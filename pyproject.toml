@@ -5,6 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "power-system-simulation"
 authors = [
+  { name = "Timo van den Bos", email = "t.a.v.d.bos@student.tue.nl" },
   { name = "Haroen Tmimi", email = "h.tmimi@student.tue.nl" },
   {name = "Julian van den Hurk", email = "j.k.v.d.hurk@student.tue.nl"},
   {name = "Jasper Fortuin", email = "j.p.f.fortuin@student.tue.nl"}
