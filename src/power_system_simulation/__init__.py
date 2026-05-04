@@ -4,6 +4,8 @@ This is a skeleton for the graph processing assignment.
 We define a graph processor class with some function skeletons.
 """
 
+from typing import List, Tuple
+
 
 class IDNotFoundError(Exception):
     pass
@@ -80,7 +82,7 @@ class GraphProcessor:
                 raise IDNotFoundError
 
         # condition 5: verify source_vertex_id is a valid vertex id
-        if not isinstance(source_id, int) :
+        if not isinstance(source_vertex_id, int):
                 raise IDNotFoundError
         if source_vertex_id not in vertex_ids:
                 raise IDNotFoundError
