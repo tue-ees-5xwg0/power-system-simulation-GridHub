@@ -113,7 +113,7 @@ class GraphProcessor:
             A list of all downstream vertices.
         """
         # put your implementation here
-        pass
+        #pass
 
     def find_alternative_edges(self, disabled_edge_id: int) -> list[int]:
         """
@@ -151,4 +151,4 @@ class GraphProcessor:
             A list of alternative edge ids.
         """
         # put your implementation here
-        pass
+        #pass
