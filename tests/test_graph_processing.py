@@ -14,7 +14,7 @@ def test_IDNotFoundError_EdgeVertex_Correct():
 def test_IDNotFoundError_EdgeVertex_NotTuple():
     vertex_ids = [0, 1, 2]
     edge_ids = [10]
-    edge_vertex_id_pairs = [0, 1]
+    edge_vertex_id_pairs = [0]
     edge_enabled = [True]
     source_vertex_id = 0
 
