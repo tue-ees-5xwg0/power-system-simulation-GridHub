@@ -68,6 +68,10 @@ class GraphProcessor:
             source_vertex_id: vertex id of the source in the graph
         """
 
+        # condition 2: verify edge_vertex_id_pairs has same length as edge_ids
+        if len(edge_vertex_id_pairs) != len(edge_ids):
+            raise InputLengthDoesNotMatchError
+
         # condition 3: verify edge_vertex_id_pairs contain only valid vertex ids
         for vertex_id_pair in edge_vertex_id_pairs:
             if not isinstance(vertex_id_pair, tuple) or len(vertex_id_pair) != 2:

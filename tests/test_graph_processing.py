@@ -1,4 +1,4 @@
-from power_system_simulation.graph_processing import GraphProcessor, IDNotFoundError
+from power_system_simulation.graph_processing import GraphProcessor, IDNotFoundError, InputLengthDoesNotMatchError
 
 
 def test_IDNotFoundError_EdgeVertex_Correct():
@@ -22,6 +22,20 @@ def test_IDNotFoundError_EdgeVertex_NotTuple():
         GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
         raise AssertionError("IDNotFoundError was not raised")
     except IDNotFoundError:
+        pass
+
+
+def test_InputLengthDoesNotMatchError_EdgeVertexLengthMismatch():
+    vertex_ids = [0, 1, 2]
+    edge_ids = [10, 11]
+    edge_vertex_id_pairs = [(0, 1)]
+    edge_enabled = [True, False]
+    source_vertex_id = 0
+
+    try:
+        GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
+        raise AssertionError("InputLengthDoesNotMatchError was not raised")
+    except InputLengthDoesNotMatchError:
         pass
 
 
@@ -129,3 +143,4 @@ def test_IDNotFoundError_SourceVertex_IdNotFound():
         raise AssertionError("IDNotFoundError was not raised")
     except IDNotFoundError:
         pass
+
