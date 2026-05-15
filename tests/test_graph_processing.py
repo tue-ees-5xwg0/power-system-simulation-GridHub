@@ -24,21 +24,6 @@ def test_IDNotFoundError_EdgeVertex_NotTuple():
     except IDNotFoundError:
         pass
 
-
-def test_InputLengthDoesNotMatchError_EdgeVertexLengthMismatch():
-    vertex_ids = [0, 1, 2]
-    edge_ids = [10, 11]
-    edge_vertex_id_pairs = [(0, 1)]
-    edge_enabled = [True, False]
-    source_vertex_id = 0
-
-    try:
-        GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
-        raise AssertionError("InputLengthDoesNotMatchError was not raised")
-    except InputLengthDoesNotMatchError:
-        pass
-
-
 def test_IDNotFoundError_EdgeVertex_WrongLength():
     vertex_ids = [0, 1, 2]
     edge_ids = [10]
@@ -144,3 +129,28 @@ def test_IDNotFoundError_SourceVertex_IdNotFound():
     except IDNotFoundError:
         pass
 
+def test_InputLengthDoesNotMatchError_EdgeVertexLengthMismatch():
+    vertex_ids = [0, 1, 2]
+    edge_ids = [10, 11]
+    edge_vertex_id_pairs = [(0, 1)]
+    edge_enabled = [True, False]
+    source_vertex_id = 0
+
+    try:
+        GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
+        raise AssertionError("InputLengthDoesNotMatchError was not raised")
+    except InputLengthDoesNotMatchError:
+        pass
+
+def test_InputLengthDoesNotMatchError_EdgeEnabledLengthMismatch():
+    vertex_ids = [0, 1, 2]
+    edge_ids = [10, 11]
+    edge_vertex_id_pairs = [(0, 1), (1, 2)]
+    edge_enabled = [True]
+    source_vertex_id = 0
+
+    try:
+        GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
+        raise AssertionError("InputLengthDoesNotMatchError was not raised")
+    except InputLengthDoesNotMatchError:
+        pass

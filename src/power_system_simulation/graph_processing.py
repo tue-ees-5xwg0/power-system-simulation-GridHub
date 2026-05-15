@@ -70,27 +70,31 @@ class GraphProcessor:
 
         # condition 2: verify edge_vertex_id_pairs has same length as edge_ids
         if len(edge_vertex_id_pairs) != len(edge_ids):
-            raise InputLengthDoesNotMatchError
+            raise InputLengthDoesNotMatchError()
 
         # condition 3: verify edge_vertex_id_pairs contain only valid vertex ids
         for vertex_id_pair in edge_vertex_id_pairs:
             if not isinstance(vertex_id_pair, tuple) or len(vertex_id_pair) != 2:
-                raise IDNotFoundError
+                raise IDNotFoundError()
 
             vertex_id_1, vertex_id_2 = vertex_id_pair
             if not isinstance(vertex_id_1, int) or not isinstance(vertex_id_2, int):
-                raise IDNotFoundError
+                raise IDNotFoundError()
 
             if vertex_id_1 not in vertex_ids or vertex_id_2 not in vertex_ids:
-                raise IDNotFoundError
+                raise IDNotFoundError()
+
+        # condition 4: verify edge_enabled has same length as edge_ids
+        if len(edge_enabled) != len(edge_ids):
+            raise InputLengthDoesNotMatchError()
 
         # condition 5: verify source_vertex_id is a valid vertex id
         if not isinstance(source_vertex_id, int):
-                raise IDNotFoundError
+                raise IDNotFoundError()
         if source_vertex_id not in vertex_ids:
-                raise IDNotFoundError
+                raise IDNotFoundError()
 
-        pass
+        #pass
 
     def find_downstream_vertices(self, edge_id: int) -> list[int]:
         """
