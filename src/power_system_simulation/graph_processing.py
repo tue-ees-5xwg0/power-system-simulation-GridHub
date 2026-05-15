@@ -67,32 +67,38 @@ class GraphProcessor:
             edge_enabled: list of bools indicating of an edge is enabled or not
             source_vertex_id: vertex id of the source in the graph
         """
+        # condition 1.1: verify vertex_ids are unique
+        if len(set(vertex_ids)) != len(vertex_ids):
+            raise IDNotUniqueError("Entries in vertex_ids are not unique.")
+        # condition 1.2: verify edge_ids are unique
+        if len(set(edge_ids)) != len(edge_ids):
+            raise IDNotUniqueError("Entries in edge_ids are not unique.")
 
         # condition 2: verify edge_vertex_id_pairs has same length as edge_ids
         if len(edge_vertex_id_pairs) != len(edge_ids):
-            raise InputLengthDoesNotMatchError()
+            raise InputLengthDoesNotMatchError("Both edge_vertex_id_pairs and edge_ids must have the same length.")
 
         # condition 3: verify edge_vertex_id_pairs contain only valid vertex ids
         for vertex_id_pair in edge_vertex_id_pairs:
             if not isinstance(vertex_id_pair, tuple) or len(vertex_id_pair) != 2:
-                raise IDNotFoundError()
+                raise IDNotFoundError("Invalid entry in edge_vertex_id_pairs: each entry must be a tuple of two vertex ids.")  # noqa: E501
 
             vertex_id_1, vertex_id_2 = vertex_id_pair
             if not isinstance(vertex_id_1, int) or not isinstance(vertex_id_2, int):
-                raise IDNotFoundError()
+                raise IDNotFoundError("Invalid entry in edge_vertex_id_pairs: each vertex id must be an integer.")
 
             if vertex_id_1 not in vertex_ids or vertex_id_2 not in vertex_ids:
-                raise IDNotFoundError()
+                raise IDNotFoundError("Invalid entry in edge_vertex_id_pairs: one or several vertex ids do not exist.")
 
         # condition 4: verify edge_enabled has same length as edge_ids
         if len(edge_enabled) != len(edge_ids):
-            raise InputLengthDoesNotMatchError()
+            raise InputLengthDoesNotMatchError("Both edge_enabled and edge_ids must have the same length.")
 
         # condition 5: verify source_vertex_id is a valid vertex id
         if not isinstance(source_vertex_id, int):
-                raise IDNotFoundError()
+                raise IDNotFoundError("Invalid source_vertex_id: must be an integer.")
         if source_vertex_id not in vertex_ids:
-                raise IDNotFoundError()
+                raise IDNotFoundError("Invalid source_vertex_id: vertex id does not exist.")
 
         #pass
 
