@@ -4,31 +4,26 @@ This is a skeleton for the graph processing assignment.
 We define a graph processor class with some function skeletons.
 """
 
+import networkx as nx
 
 
 class IDNotFoundError(Exception):
     pass
 
-
 class InputLengthDoesNotMatchError(Exception):
     pass
-
 
 class IDNotUniqueError(Exception):
     pass
 
-
 class GraphNotFullyConnectedError(Exception):
     pass
-
 
 class GraphCycleError(Exception):
     pass
 
-
 class EdgeAlreadyDisabledError(Exception):
     pass
-
 
 class GraphProcessor:
     """
@@ -88,7 +83,7 @@ class GraphProcessor:
                 raise IDNotFoundError("Invalid entry in edge_vertex_id_pairs: each vertex id must be an integer.")
 
             if vertex_id_1 not in vertex_ids or vertex_id_2 not in vertex_ids:
-                raise IDNotFoundError("Invalid entry in edge_vertex_id_pairs: one or several vertex ids do not exist.")
+                raise IDNotFoundError("Invalid entry in edge_vertex_id_pairs: one or more vertex ids do not exist.")
 
         # condition 4: verify edge_enabled has same length as edge_ids
         if len(edge_enabled) != len(edge_ids):
@@ -100,6 +95,21 @@ class GraphProcessor:
         if source_vertex_id not in vertex_ids:
                 raise IDNotFoundError("Invalid source_vertex_id: vertex id does not exist.")
 
+        # Initiate graph with only the enabled edges
+        self.graph = nx.Graph()
+        self.graph.add_nodes_from(vertex_ids)
+
+        for (vertex1, vertex2), enabled in zip(edge_vertex_id_pairs, edge_enabled, strict=False):
+            if enabled:
+                self.graph.add_edge(vertex1, vertex2)
+
+        # condition 6: verify the graph is fully connected
+        if not nx.is_connected(self.graph):
+            raise GraphNotFullyConnectedError("The graph is not fully connected.")
+
+        # condition 7: verify the graph does not contain cycles
+        if not nx.is_tree(self.graph):
+            raise GraphCycleError("The graph contains one or more cycles.")
         #pass
 
     def find_downstream_vertices(self, edge_id: int) -> list[int]:
