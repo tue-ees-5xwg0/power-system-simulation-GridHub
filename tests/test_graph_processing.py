@@ -1,4 +1,5 @@
 from power_system_simulation.graph_processing import (
+    EdgeAlreadyDisabledError,
     GraphCycleError,
     GraphNotFullyConnectedError,
     GraphProcessor,
@@ -130,6 +131,7 @@ def test_IDNotFoundError_EdgeVertex_IdNotFound1():
         raise AssertionError("IDNotFoundError was not raised while edge_vertex_id_pairs does not contain valid vertex ids.") # noqa: E501
     except IDNotFoundError:
         pass
+
 # Test condition 3.6: edge_vertex_id_pairs does not contain valid vertex ids. (IDNotFoundError)
 def test_IDNotFoundError_EdgeVertex_IdNotFound2():
     vertex_ids = [0, 1, 2]
@@ -224,3 +226,67 @@ def test_GraphCycleError():
         raise AssertionError("GraphCycleError was not raised while the graph contains cycles.")
     except GraphCycleError:
         pass
+
+# **Testing for function: find_alternative_edges**
+# Initialize a graph to test find_alternative_edges function.
+def initialize_test_graph():
+    """vertex_0 (source) --edge_1(enabled)-- vertex_2 --edge_9(enabled)-- vertex_10
+                 |                               |
+                 |                           edge_7(disabled)
+                 |                               |
+                 -----------edge_3(enabled)-- vertex_4
+                 |                               |
+                 |                           edge_8(disabled)
+                 |                               |
+                 -----------edge_5(enabled)-- vertex_6"""
+    vertex_ids = [0, 2, 4, 6, 10]
+    edge_ids = [1, 3, 5, 7, 8, 9]
+    edge_vertex_id_pairs = [(0, 2), (0, 4), (0, 6), (2, 4), (4, 6), (2, 10)]
+    edge_enabled = [True, True, True, False, False, True]
+    source_vertex_id = 0
+
+    return GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
+
+# Test case 1: disabled_edge_id does not exist. (IDNotFoundError)
+def test_IDNotFoundError_DisabledEdge_NotFound():
+    graph = initialize_test_graph()
+
+    try:
+        graph.find_alternative_edges(12)
+        raise AssertionError("IDNotFoundError was not raised while disabled_edge_id does not exist.")
+    except IDNotFoundError:
+        pass
+
+# Test case 2: disabled_edge_id is already disabled. (EdgeAlreadyDisabledError)
+def test_EdgeAlreadyDisabledError():
+    graph = initialize_test_graph()
+
+    try:
+        graph.find_alternative_edges(7)
+        raise AssertionError("EdgeAlreadyDisabledError was not raised while disabled_edge_id is already disabled.")
+    except EdgeAlreadyDisabledError:
+        pass
+
+# Test case 3: one alternative edge to make the graph fully connected again. (return list with one edge id)
+def test_OneAlternativeEdge():
+    graph = initialize_test_graph()
+
+    assert graph.find_alternative_edges(1) == [7]
+
+# Test case 4: one alternative edge to make the graph fully connected again. (return list with one edge id)
+def test_OneAlternativeEdge_2():
+    graph = initialize_test_graph()
+
+    assert graph.find_alternative_edges(5) == [8]
+
+# Test case 5: two alternative edges to make the graph fully connected again. (return list with two edge ids)
+def test_TwoAlternativeEdges():
+    graph = initialize_test_graph()
+
+    assert graph.find_alternative_edges(3) == [7, 8]
+
+# Test case 6: no alternative edge to make the graph fully connected again. (return empty list)
+def test_NoAlternativeEdge():
+    graph = initialize_test_graph()
+
+    assert graph.find_alternative_edges(9) == []

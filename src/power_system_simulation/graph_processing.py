@@ -1,9 +1,10 @@
 """
-This is a skeleton for the graph processing assignment.
-
-We define a graph processor class with some function skeletons.
+This module contains the implementation of assignment 1: Graph Processing.
+The main class in the module is GraphProcessor, which processes a graph and provides two functions:
+    1. find_downstream_vertices: Returns a list of all downstream vertices.
+    2. find_alternative_edges: Returns a list of all alternative edges.
+The GraphProcessor class makes use of the networkx package to help process the graph.
 """
-
 import networkx as nx
 
 
@@ -27,9 +28,14 @@ class EdgeAlreadyDisabledError(Exception):
 
 class GraphProcessor:
     """
-    General documentation of this class.
-    You need to describe the purpose of this class and the functions in it.
-    We are using an undirected graph in the processor.
+    This class processes a graph and provides two functions:
+    1. find_downstream_vertices: given an edge id, return all the vertices which
+       are in the downstream of the edge, with respect to the source vertex.
+       Returns a list of all downstream vertices.
+    2. find_alternative_edges: given an enabled edge, if the edge is going
+       to be disabled, which (currently disabled) edge can be enabled to ensure
+       that the graph is again fully connected and acyclic?
+       Returns a list of all alternative edges.
     """
 
     def __init__(
@@ -93,7 +99,7 @@ class GraphProcessor:
         if not isinstance(source_vertex_id, int):
                 raise IDNotFoundError("Invalid source_vertex_id: must be an integer.")
         if source_vertex_id not in vertex_ids:
-                raise IDNotFoundError("Invalid source_vertex_id: vertex id does not exist.")
+                raise IDNotFoundError(f"Invalid source_vertex_id: vertex {source_vertex_id} does not exist.")
 
         # Initiate graph with only the enabled edges
         self.graph = nx.Graph()
@@ -110,7 +116,14 @@ class GraphProcessor:
         # condition 7: verify the graph does not contain cycles
         if not nx.is_tree(self.graph):
             raise GraphCycleError("The graph contains one or more cycles.")
-        #pass
+
+        # create 'self' object
+        self.edge_ids = edge_ids
+        self.edge_enabled = edge_enabled
+        self.edge_vertex_id_pairs = edge_vertex_id_pairs
+
+        # create combined edge data to support find_alternative_edges function
+        self.combined_edge_data = list(zip(edge_ids, edge_enabled, edge_vertex_id_pairs, strict=False))
 
     def find_downstream_vertices(self, edge_id: int) -> list[int]:
         """
@@ -150,7 +163,6 @@ class GraphProcessor:
         If the disabled_edge_id is already disabled, it should raise EdgeAlreadyDisabledError.
         If there are no alternative to make the graph fully connected again, it should return empty list.
 
-
         For example, given the following graph:
 
         vertex_0 (source) --edge_1(enabled)-- vertex_2 --edge_9(enabled)-- vertex_10
@@ -174,5 +186,28 @@ class GraphProcessor:
         Returns:
             A list of alternative edge ids.
         """
-        # put your implementation here
+        # check if disabled_edge_id is a valid edge id
+        if disabled_edge_id not in self.edge_ids:
+            raise IDNotFoundError(f"Invalid disabled_edge_id: edge {disabled_edge_id} does not exist.")
+
+        # check if disabled_edge_id is already disabled
+        disabled_edge_index = self.edge_ids.index(disabled_edge_id)
+        if not self.edge_enabled[disabled_edge_index]:
+            raise EdgeAlreadyDisabledError(f"Edge {disabled_edge_id} is already disabled.")
+
+        # store disabled_edge_id vertex pair
+        vertex1, vertex2 = self.edge_vertex_id_pairs[disabled_edge_index]
+
+        # find the component that contains vertex1 after disabling the edge
+        self.graph.remove_edge(vertex1, vertex2)
+        disabled_edge_component = nx.node_connected_component(self.graph, vertex1)
+        self.graph.add_edge(vertex1, vertex2)
+
+        # return the disabled edge ids which connect a vertex in the component to a vertex outside the component
+        return [
+            edge_id
+            for edge_id, enabled, (vertex_a, vertex_b) in self.combined_edge_data
+            if not enabled
+            and (vertex_a in disabled_edge_component) != (vertex_b in disabled_edge_component)
+        ]
         #pass
