@@ -5,26 +5,33 @@ The main class in the module is GraphProcessor, which processes a graph and prov
     2. find_alternative_edges: Returns a list of all alternative edges.
 The GraphProcessor class makes use of the networkx package to help process the graph.
 """
+
 import networkx as nx
 
 
 class IDNotFoundError(Exception):
     pass
 
+
 class InputLengthDoesNotMatchError(Exception):
     pass
+
 
 class IDNotUniqueError(Exception):
     pass
 
+
 class GraphNotFullyConnectedError(Exception):
     pass
+
 
 class GraphCycleError(Exception):
     pass
 
+
 class EdgeAlreadyDisabledError(Exception):
     pass
+
 
 class GraphProcessor:
     """
@@ -82,7 +89,9 @@ class GraphProcessor:
         # Condition 3: verify edge_vertex_id_pairs contain only valid vertex ids
         for vertex_id_pair in edge_vertex_id_pairs:
             if not isinstance(vertex_id_pair, tuple) or len(vertex_id_pair) != 2:
-                raise IDNotFoundError("Invalid entry in edge_vertex_id_pairs: each entry must be a tuple of two vertex ids.")  # noqa: E501
+                raise IDNotFoundError(
+                    "Invalid entry in edge_vertex_id_pairs: each entry must be a tuple of two vertex ids."
+                )  # noqa: E501
 
             vertex_id_1, vertex_id_2 = vertex_id_pair
             if not isinstance(vertex_id_1, int) or not isinstance(vertex_id_2, int):
@@ -97,9 +106,9 @@ class GraphProcessor:
 
         # Condition 5: verify source_vertex_id is a valid vertex id
         if not isinstance(source_vertex_id, int):
-                raise IDNotFoundError("Invalid source_vertex_id: must be an integer.")
+            raise IDNotFoundError("Invalid source_vertex_id: must be an integer.")
         if source_vertex_id not in vertex_ids:
-                raise IDNotFoundError(f"Invalid source_vertex_id: vertex {source_vertex_id} does not exist.")
+            raise IDNotFoundError(f"Invalid source_vertex_id: vertex {source_vertex_id} does not exist.")
 
         # Initiate graph with only the enabled edges
         self.graph = nx.Graph()
@@ -155,7 +164,7 @@ class GraphProcessor:
             raise IDNotFoundError(f"Invalid edge_id: edge {edge_id} does not exist.")
 
         # Find index of given edge_id in edge_ids list
-        edge_id_index= self.edge_ids.index(edge_id)
+        edge_id_index = self.edge_ids.index(edge_id)
 
         # Check if the given edge_id is a disabled edge and if so return empty list
         if not self.edge_enabled[edge_id_index]:
@@ -174,7 +183,6 @@ class GraphProcessor:
         for component in nx.connected_components(copied_graph):
             if self.source_vertex_id not in component:
                 return list(component)
-
 
     def find_alternative_edges(self, disabled_edge_id: int) -> list[int]:
         """
@@ -231,6 +239,5 @@ class GraphProcessor:
         return [
             edge_id
             for edge_id, enabled, (vertex_a, vertex_b) in self.combined_edge_data
-            if not enabled
-            and (vertex_a in disabled_edge_component) != (vertex_b in disabled_edge_component)
+            if not enabled and (vertex_a in disabled_edge_component) != (vertex_b in disabled_edge_component)
         ]

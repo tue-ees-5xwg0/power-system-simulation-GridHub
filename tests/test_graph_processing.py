@@ -23,6 +23,7 @@ def test_IDNotUniqueError_VertexIDs():
     except IDNotUniqueError:
         pass
 
+
 # Test condition 1.2: edge_ids are not unique. (IDNotUniqueError)
 def test_IDNotUniqueError_EdgeIDs():
     vertex_ids = [0, 1, 2]
@@ -37,6 +38,7 @@ def test_IDNotUniqueError_EdgeIDs():
     except IDNotUniqueError:
         pass
 
+
 # Test condition 2: edge_vertex_id_pairs is not the same length as edge_ids. (InputLengthDoesNotMatchError)
 def test_InputLengthDoesNotMatchError_EdgeVertexPairsLengthMismatch():
     vertex_ids = [0, 1, 2]
@@ -47,10 +49,12 @@ def test_InputLengthDoesNotMatchError_EdgeVertexPairsLengthMismatch():
 
     try:
         GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
-        raise AssertionError("InputLengthDoesNotMatchError was not raised while edge_vertex_id_pairs " \
-                             "and edge_ids lengths do not match.")
+        raise AssertionError(
+            "InputLengthDoesNotMatchError was not raised while edge_vertex_id_pairs and edge_ids lengths do not match."
+        )
     except InputLengthDoesNotMatchError:
         pass
+
 
 # Test condition 3.0: edge_vertex_id_pairs contains valid vertex ids. (IDNotFoundError)
 def test_IDNotFoundError_EdgeVertex_Correct():
@@ -62,6 +66,7 @@ def test_IDNotFoundError_EdgeVertex_Correct():
 
     graph = GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
     assert isinstance(graph, GraphProcessor)
+
 
 # Test condition 3.1: edge_vertex_id_pairs does not contain tuples. (IDNotFoundError)
 def test_IDNotFoundError_EdgeVertex_NotTuple():
@@ -77,6 +82,7 @@ def test_IDNotFoundError_EdgeVertex_NotTuple():
     except IDNotFoundError:
         pass
 
+
 # Test condition 3.2: edge_vertex_id_pairs does not contain tuples of length 2. (IDNotFoundError)
 def test_IDNotFoundError_EdgeVertex_WrongLength():
     vertex_ids = [0, 1, 2]
@@ -87,10 +93,12 @@ def test_IDNotFoundError_EdgeVertex_WrongLength():
 
     try:
         GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
-        raise AssertionError("IDNotFoundError was not raised while tuples in " \
-                             "edge_vertex_id_pairs have incorrect length.")
+        raise AssertionError(
+            "IDNotFoundError was not raised while tuples in edge_vertex_id_pairs have incorrect length."
+        )
     except IDNotFoundError:
         pass
+
 
 # Test condition 3.3: edge_vertex_id_pairs does not contain tuples of integers. (IDNotFoundError)
 def test_IDNotFoundError_EdgeVertex_NonInt1():
@@ -102,10 +110,12 @@ def test_IDNotFoundError_EdgeVertex_NonInt1():
 
     try:
         GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
-        raise AssertionError("IDNotFoundError was not raised while tuples in " \
-                             "edge_vertex_id_pairs contain non-integer values.")
+        raise AssertionError(
+            "IDNotFoundError was not raised while tuples in edge_vertex_id_pairs contain non-integer values."
+        )
     except IDNotFoundError:
         pass
+
 
 # Test condition 3.4: edge_vertex_id_pairs does not contain tuples of integers. (IDNotFoundError)
 def test_IDNotFoundError_EdgeVertex_NonInt2():
@@ -117,12 +127,14 @@ def test_IDNotFoundError_EdgeVertex_NonInt2():
 
     try:
         GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
-        raise AssertionError("IDNotFoundError was not raised while tuples in " \
-                             "edge_vertex_id_pairs contain non-integer values.")
+        raise AssertionError(
+            "IDNotFoundError was not raised while tuples in edge_vertex_id_pairs contain non-integer values."
+        )
     except IDNotFoundError:
         pass
 
-#Test condition 3.5: edge_vertex_id_pairs does not contain valid vertex ids. (IDNotFoundError)
+
+# Test condition 3.5: edge_vertex_id_pairs does not contain valid vertex ids. (IDNotFoundError)
 def test_IDNotFoundError_EdgeVertex_IdNotFound1():
     vertex_ids = [0, 1, 2]
     edge_ids = [10]
@@ -132,10 +144,12 @@ def test_IDNotFoundError_EdgeVertex_IdNotFound1():
 
     try:
         GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
-        raise AssertionError("IDNotFoundError was not raised while edge_vertex_id_pairs " \
-                             "does not contain valid vertex ids.")
+        raise AssertionError(
+            "IDNotFoundError was not raised while edge_vertex_id_pairs does not contain valid vertex ids."
+        )
     except IDNotFoundError:
         pass
+
 
 # Test condition 3.6: edge_vertex_id_pairs does not contain valid vertex ids. (IDNotFoundError)
 def test_IDNotFoundError_EdgeVertex_IdNotFound2():
@@ -147,10 +161,12 @@ def test_IDNotFoundError_EdgeVertex_IdNotFound2():
 
     try:
         GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
-        raise AssertionError("IDNotFoundError was not raised while edge_vertex_id_pairs " \
-                             "does not contain valid vertex ids.")
+        raise AssertionError(
+            "IDNotFoundError was not raised while edge_vertex_id_pairs does not contain valid vertex ids."
+        )
     except IDNotFoundError:
         pass
+
 
 # Test condition 4: edge_enabled is not the same length as edge_ids. (InputLengthDoesNotMatchError)
 def test_InputLengthDoesNotMatchError_EdgeEnabledLengthMismatch():
@@ -162,10 +178,12 @@ def test_InputLengthDoesNotMatchError_EdgeEnabledLengthMismatch():
 
     try:
         GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
-        raise AssertionError("InputLengthDoesNotMatchError was not raised while edge_enabled " \
-                             "is not the same length as edge_ids.")
+        raise AssertionError(
+            "InputLengthDoesNotMatchError was not raised while edge_enabled is not the same length as edge_ids."
+        )
     except InputLengthDoesNotMatchError:
         pass
+
 
 # Test condition 5.0: source_vertex_id is a valid vertex id. (IDNotFoundError)
 def test_IDNotFoundError_SourceVertex_Correct():
@@ -177,6 +195,7 @@ def test_IDNotFoundError_SourceVertex_Correct():
 
     graph = GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
     assert isinstance(graph, GraphProcessor)
+
 
 # Test condition 5.1: source_vertex_id is not an integer. (IDNotFoundError)
 def test_IDNotFoundError_SourceVertex_NonInt():
@@ -192,6 +211,7 @@ def test_IDNotFoundError_SourceVertex_NonInt():
     except IDNotFoundError:
         pass
 
+
 # Test condition 5.2: source_vertex_id does not exist in vertex_ids. (IDNotFoundError)
 def test_IDNotFoundError_SourceVertex_IdNotFound():
     vertex_ids = [0, 1, 2]
@@ -205,6 +225,7 @@ def test_IDNotFoundError_SourceVertex_IdNotFound():
         raise AssertionError("IDNotFoundError was not raised while source_vertex_id does not exist in vertex_ids.")
     except IDNotFoundError:
         pass
+
 
 # Test condition 6: the graph is not fully connected. (GraphNotFullyConnectedError)
 def test_GraphNotFullyConnectedError():
@@ -220,6 +241,7 @@ def test_GraphNotFullyConnectedError():
     except GraphNotFullyConnectedError:
         pass
 
+
 # Test condition 7: the graph contains cycles. (GraphCycleError)
 def test_GraphCycleError():
     vertex_ids = [0, 1, 2]
@@ -234,17 +256,18 @@ def test_GraphCycleError():
     except GraphCycleError:
         pass
 
+
 # Initialize a graph to test find_downstream_vertices and find_alternative_edges function.
 def initialize_test_graph():
     """vertex_0 (source) --edge_1(enabled)-- vertex_2 --edge_9(enabled)-- vertex_10
-                 |                               |
-                 |                           edge_7(disabled)
-                 |                               |
-                 -----------edge_3(enabled)-- vertex_4
-                 |                               |
-                 |                           edge_8(disabled)
-                 |                               |
-                 -----------edge_5(enabled)-- vertex_6"""
+    |                               |
+    |                           edge_7(disabled)
+    |                               |
+    -----------edge_3(enabled)-- vertex_4
+    |                               |
+    |                           edge_8(disabled)
+    |                               |
+    -----------edge_5(enabled)-- vertex_6"""
     vertex_ids = [0, 2, 4, 6, 10]
     edge_ids = [1, 3, 5, 7, 8, 9]
     edge_vertex_id_pairs = [(0, 2), (0, 4), (0, 6), (2, 4), (4, 6), (2, 10)]
@@ -252,6 +275,7 @@ def initialize_test_graph():
     source_vertex_id = 0
 
     return GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
+
 
 # **Testing for function: find_downstream_vertices**
 # Test case 1: edge_id does not exist. (IDNotFoundError)
@@ -264,11 +288,13 @@ def test_IDNotFoundError_Edge_NotFound():
     except IDNotFoundError:
         pass
 
+
 # Test case 2: edge_id is disabled return empty list.
 def test_DisabledEdge_ReturnEmpty():
     graph = initialize_test_graph()
 
     assert graph.find_downstream_vertices(7) == []
+
 
 # Test case 3: edge_id is enabled return multiple downstream vertices (chain).
 def test_Downstream_Edge1():
@@ -277,12 +303,14 @@ def test_Downstream_Edge1():
     result = graph.find_downstream_vertices(1)
     assert set(result) == {2, 10}
 
+
 # Test case 4: edge_id is enabled return single downstream vertex.
 def test_Downstream_Edge9():
     graph = initialize_test_graph()
 
     result = graph.find_downstream_vertices(9)
     assert result == [10]
+
 
 # Test case 5: edge_id is enabled return single downstream vertex (branch).
 def test_Downstream_Edge3():
@@ -291,12 +319,14 @@ def test_Downstream_Edge3():
     result = graph.find_downstream_vertices(3)
     assert result == [4]
 
+
 # Test case 6: edge_id is enabled return single downstream vertex (leaf in branch).
 def test_Downstream_Edge5():
     graph = initialize_test_graph()
 
     result = graph.find_downstream_vertices(5)
     assert result == [6]
+
 
 # **Testing for function: find_alternative_edges**
 # Test case 1: disabled_edge_id does not exist. (IDNotFoundError)
@@ -309,6 +339,7 @@ def test_IDNotFoundError_DisabledEdge_NotFound():
     except IDNotFoundError:
         pass
 
+
 # Test case 2: disabled_edge_id is already disabled. (EdgeAlreadyDisabledError)
 def test_EdgeAlreadyDisabledError():
     graph = initialize_test_graph()
@@ -319,11 +350,13 @@ def test_EdgeAlreadyDisabledError():
     except EdgeAlreadyDisabledError:
         pass
 
+
 # Test case 3: one alternative edge to make the graph fully connected again. (return list with one edge id)
 def test_OneAlternativeEdge():
     graph = initialize_test_graph()
 
     assert graph.find_alternative_edges(1) == [7]
+
 
 # Test case 4: one alternative edge to make the graph fully connected again. (return list with one edge id)
 def test_OneAlternativeEdge_2():
@@ -331,11 +364,13 @@ def test_OneAlternativeEdge_2():
 
     assert graph.find_alternative_edges(5) == [8]
 
+
 # Test case 5: two alternative edges to make the graph fully connected again. (return list with two edge ids)
 def test_TwoAlternativeEdges():
     graph = initialize_test_graph()
 
     assert graph.find_alternative_edges(3) == [7, 8]
+
 
 # Test case 6: no alternative edge to make the graph fully connected again. (return empty list)
 def test_NoAlternativeEdge():
