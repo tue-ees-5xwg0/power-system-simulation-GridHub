@@ -47,7 +47,8 @@ def test_InputLengthDoesNotMatchError_EdgeVertexPairsLengthMismatch():
 
     try:
         GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
-        raise AssertionError("InputLengthDoesNotMatchError was not raised while edge_vertex_id_pairs and edge_ids lengths do not match.") # noqa: E501
+        raise AssertionError("InputLengthDoesNotMatchError was not raised while edge_vertex_id_pairs " \
+                             "and edge_ids lengths do not match.")
     except InputLengthDoesNotMatchError:
         pass
 
@@ -86,7 +87,8 @@ def test_IDNotFoundError_EdgeVertex_WrongLength():
 
     try:
         GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
-        raise AssertionError("IDNotFoundError was not raised while tuples in edge_vertex_id_pairs have incorrect length.") # noqa: E501
+        raise AssertionError("IDNotFoundError was not raised while tuples in " \
+                             "edge_vertex_id_pairs have incorrect length.")
     except IDNotFoundError:
         pass
 
@@ -100,7 +102,8 @@ def test_IDNotFoundError_EdgeVertex_NonInt1():
 
     try:
         GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
-        raise AssertionError("IDNotFoundError was not raised while tuples in edge_vertex_id_pairs contain non-integer values.") # noqa: E501
+        raise AssertionError("IDNotFoundError was not raised while tuples in " \
+                             "edge_vertex_id_pairs contain non-integer values.")
     except IDNotFoundError:
         pass
 
@@ -114,7 +117,8 @@ def test_IDNotFoundError_EdgeVertex_NonInt2():
 
     try:
         GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
-        raise AssertionError("IDNotFoundError was not raised while tuples in edge_vertex_id_pairs contain non-integer values.") # noqa: E501
+        raise AssertionError("IDNotFoundError was not raised while tuples in " \
+                             "edge_vertex_id_pairs contain non-integer values.")
     except IDNotFoundError:
         pass
 
@@ -128,7 +132,8 @@ def test_IDNotFoundError_EdgeVertex_IdNotFound1():
 
     try:
         GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
-        raise AssertionError("IDNotFoundError was not raised while edge_vertex_id_pairs does not contain valid vertex ids.") # noqa: E501
+        raise AssertionError("IDNotFoundError was not raised while edge_vertex_id_pairs " \
+                             "does not contain valid vertex ids.")
     except IDNotFoundError:
         pass
 
@@ -142,7 +147,8 @@ def test_IDNotFoundError_EdgeVertex_IdNotFound2():
 
     try:
         GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
-        raise AssertionError("IDNotFoundError was not raised while edge_vertex_id_pairs does not contain valid vertex ids.") # noqa: E501
+        raise AssertionError("IDNotFoundError was not raised while edge_vertex_id_pairs " \
+                             "does not contain valid vertex ids.")
     except IDNotFoundError:
         pass
 
@@ -156,7 +162,8 @@ def test_InputLengthDoesNotMatchError_EdgeEnabledLengthMismatch():
 
     try:
         GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
-        raise AssertionError("InputLengthDoesNotMatchError was not raised while edge_enabled is not the same length as edge_ids.") # noqa: E501
+        raise AssertionError("InputLengthDoesNotMatchError was not raised while edge_enabled " \
+                             "is not the same length as edge_ids.")
     except InputLengthDoesNotMatchError:
         pass
 
