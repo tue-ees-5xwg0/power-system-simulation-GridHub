@@ -68,18 +68,18 @@ class GraphProcessor:
             edge_enabled: list of bools indicating of an edge is enabled or not
             source_vertex_id: vertex id of the source in the graph
         """
-        # condition 1.1: verify vertex_ids are unique
+        # Condition 1.1: verify vertex_ids are unique
         if len(set(vertex_ids)) != len(vertex_ids):
             raise IDNotUniqueError("Entries in vertex_ids are not unique.")
-        # condition 1.2: verify edge_ids are unique
+        # Condition 1.2: verify edge_ids are unique
         if len(set(edge_ids)) != len(edge_ids):
             raise IDNotUniqueError("Entries in edge_ids are not unique.")
 
-        # condition 2: verify edge_vertex_id_pairs has same length as edge_ids
+        # Condition 2: verify edge_vertex_id_pairs has same length as edge_ids
         if len(edge_vertex_id_pairs) != len(edge_ids):
             raise InputLengthDoesNotMatchError("Both edge_vertex_id_pairs and edge_ids must have the same length.")
 
-        # condition 3: verify edge_vertex_id_pairs contain only valid vertex ids
+        # Condition 3: verify edge_vertex_id_pairs contain only valid vertex ids
         for vertex_id_pair in edge_vertex_id_pairs:
             if not isinstance(vertex_id_pair, tuple) or len(vertex_id_pair) != 2:
                 raise IDNotFoundError("Invalid entry in edge_vertex_id_pairs: each entry must be a tuple of two vertex ids.")  # noqa: E501
@@ -91,11 +91,11 @@ class GraphProcessor:
             if vertex_id_1 not in vertex_ids or vertex_id_2 not in vertex_ids:
                 raise IDNotFoundError("Invalid entry in edge_vertex_id_pairs: one or more vertex ids do not exist.")
 
-        # condition 4: verify edge_enabled has same length as edge_ids
+        # Condition 4: verify edge_enabled has same length as edge_ids
         if len(edge_enabled) != len(edge_ids):
             raise InputLengthDoesNotMatchError("Both edge_enabled and edge_ids must have the same length.")
 
-        # condition 5: verify source_vertex_id is a valid vertex id
+        # Condition 5: verify source_vertex_id is a valid vertex id
         if not isinstance(source_vertex_id, int):
                 raise IDNotFoundError("Invalid source_vertex_id: must be an integer.")
         if source_vertex_id not in vertex_ids:
@@ -109,20 +109,21 @@ class GraphProcessor:
             if enabled:
                 self.graph.add_edge(vertex1, vertex2)
 
-        # condition 6: verify the graph is fully connected
+        # Condition 6: verify the graph is fully connected
         if not nx.is_connected(self.graph):
             raise GraphNotFullyConnectedError("The graph is not fully connected.")
 
-        # condition 7: verify the graph does not contain cycles
+        # Condition 7: verify the graph does not contain cycles
         if not nx.is_tree(self.graph):
             raise GraphCycleError("The graph contains one or more cycles.")
 
-        # create 'self' object
+        # Create 'self' object
         self.edge_ids = edge_ids
+        self.source_vertex_id = source_vertex_id
         self.edge_enabled = edge_enabled
         self.edge_vertex_id_pairs = edge_vertex_id_pairs
 
-        # create combined edge data to support find_alternative_edges function
+        # Create combined edge data to support find_alternative_edges function
         self.combined_edge_data = list(zip(edge_ids, edge_enabled, edge_vertex_id_pairs, strict=False))
 
     def find_downstream_vertices(self, edge_id: int) -> list[int]:
@@ -149,8 +150,31 @@ class GraphProcessor:
         Returns:
             A list of all downstream vertices.
         """
-        # put your implementation here
-        #pass
+        # Check if the given edge_id exists
+        if edge_id not in self.edge_ids:
+            raise IDNotFoundError("The given edge_id does not exist.")
+
+        # Find index of given edge_id in edge_ids list
+        edge_id_index= self.edge_ids.index(edge_id)
+
+        # Check if the given edge_id is a disabled edge and if so return empty list
+        if not self.edge_enabled[edge_id_index]:
+            return []
+
+        # Find the vertex id pair of the given edge_id
+        vertex1, vertex2 = self.edge_vertex_id_pairs[edge_id_index]
+
+        # Make copy of graph to avoid modifying original
+        copied_graph = self.graph.copy()
+
+        # Remove edge corresponding to given edge_id
+        copied_graph.remove_edge(vertex1, vertex2)
+
+        # Find connected components and return component that doesn't contain source vertex id as downstream vertices
+        for component in nx.connected_components(copied_graph):
+            if self.source_vertex_id not in component:
+                return list(component)
+
 
     def find_alternative_edges(self, disabled_edge_id: int) -> list[int]:
         """
@@ -186,28 +210,27 @@ class GraphProcessor:
         Returns:
             A list of alternative edge ids.
         """
-        # check if disabled_edge_id is a valid edge id
+        # Check if disabled_edge_id is a valid edge id
         if disabled_edge_id not in self.edge_ids:
             raise IDNotFoundError(f"Invalid disabled_edge_id: edge {disabled_edge_id} does not exist.")
 
-        # check if disabled_edge_id is already disabled
+        # Check if disabled_edge_id is already disabled
         disabled_edge_index = self.edge_ids.index(disabled_edge_id)
         if not self.edge_enabled[disabled_edge_index]:
             raise EdgeAlreadyDisabledError(f"Edge {disabled_edge_id} is already disabled.")
 
-        # store disabled_edge_id vertex pair
+        # Store disabled_edge_id vertex pair
         vertex1, vertex2 = self.edge_vertex_id_pairs[disabled_edge_index]
 
-        # find the component that contains vertex1 after disabling the edge
+        # Find the component that contains vertex1 after disabling the edge
         self.graph.remove_edge(vertex1, vertex2)
         disabled_edge_component = nx.node_connected_component(self.graph, vertex1)
         self.graph.add_edge(vertex1, vertex2)
 
-        # return the disabled edge ids which connect a vertex in the component to a vertex outside the component
+        # Return the disabled edge ids which connect a vertex in the component to a vertex outside the component
         return [
             edge_id
             for edge_id, enabled, (vertex_a, vertex_b) in self.combined_edge_data
             if not enabled
             and (vertex_a in disabled_edge_component) != (vertex_b in disabled_edge_component)
         ]
-        #pass
