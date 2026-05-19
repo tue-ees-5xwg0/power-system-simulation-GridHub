@@ -246,7 +246,7 @@ def initialize_test_graph():
 
     return GraphProcessor(vertex_ids, edge_ids, edge_vertex_id_pairs, edge_enabled, source_vertex_id)
 
-# **Testing for function: find_downstream_vertice**
+# **Testing for function: find_downstream_vertices**
 # Test case 1: edge_id does not exist. (IDNotFoundError)
 def test_IDNotFoundError_Edge_NotFound():
     graph = initialize_test_graph()
@@ -270,7 +270,6 @@ def test_Downstream_Edge1():
     result = graph.find_downstream_vertices(1)
     assert set(result) == {2, 10}
 
-
 # Test case 4: edge_id is enabled return single downstream vertex.
 def test_Downstream_Edge9():
     graph = initialize_test_graph()
@@ -278,14 +277,12 @@ def test_Downstream_Edge9():
     result = graph.find_downstream_vertices(9)
     assert result == [10]
 
-
-# Test case 5: edge_id is enabled return multiple downstream vertices (branch).
+# Test case 5: edge_id is enabled return single downstream vertex (branch).
 def test_Downstream_Edge3():
     graph = initialize_test_graph()
 
     result = graph.find_downstream_vertices(3)
-    assert set(result) == {4}
-
+    assert result == [4]
 
 # Test case 6: edge_id is enabled return single downstream vertex (leaf in branch).
 def test_Downstream_Edge5():

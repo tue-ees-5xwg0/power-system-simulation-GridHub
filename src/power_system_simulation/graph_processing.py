@@ -152,7 +152,7 @@ class GraphProcessor:
         """
         # Check if the given edge_id exists
         if edge_id not in self.edge_ids:
-            raise IDNotFoundError("The given edge_id does not exist.")
+            raise IDNotFoundError(f"Invalid edge_id: edge {edge_id} does not exist.")
 
         # Find index of given edge_id in edge_ids list
         edge_id_index= self.edge_ids.index(edge_id)
