@@ -75,40 +75,13 @@ class GraphProcessor:
             edge_enabled: list of bools indicating of an edge is enabled or not
             source_vertex_id: vertex id of the source in the graph
         """
-        # Condition 1.1: verify vertex_ids are unique
-        if len(set(vertex_ids)) != len(vertex_ids):
-            raise IDNotUniqueError("Entries in vertex_ids are not unique.")
-        # Condition 1.2: verify edge_ids are unique
-        if len(set(edge_ids)) != len(edge_ids):
-            raise IDNotUniqueError("Entries in edge_ids are not unique.")
+        # Run first 5 condition checks
+        self._condition_1(vertex_ids, edge_ids)
+        self._condition_2(edge_ids, edge_vertex_id_pairs)
+        self._condition_3(vertex_ids, edge_vertex_id_pairs)
+        self._condition_4(edge_ids, edge_enabled)
+        self._condition_5(vertex_ids, source_vertex_id)
 
-        # Condition 2: verify edge_vertex_id_pairs has same length as edge_ids
-        if len(edge_vertex_id_pairs) != len(edge_ids):
-            raise InputLengthDoesNotMatchError("Both edge_vertex_id_pairs and edge_ids must have the same length.")
-
-        # Condition 3: verify edge_vertex_id_pairs contain only valid vertex ids
-        for vertex_id_pair in edge_vertex_id_pairs:
-            if not isinstance(vertex_id_pair, tuple) or len(vertex_id_pair) != 2:
-                raise IDNotFoundError(
-                    "Invalid entry in edge_vertex_id_pairs: each entry must be a tuple of two vertex ids."
-                )  # noqa: E501
-
-            vertex_id_1, vertex_id_2 = vertex_id_pair
-            if not isinstance(vertex_id_1, int) or not isinstance(vertex_id_2, int):
-                raise IDNotFoundError("Invalid entry in edge_vertex_id_pairs: each vertex id must be an integer.")
-
-            if vertex_id_1 not in vertex_ids or vertex_id_2 not in vertex_ids:
-                raise IDNotFoundError("Invalid entry in edge_vertex_id_pairs: one or more vertex ids do not exist.")
-
-        # Condition 4: verify edge_enabled has same length as edge_ids
-        if len(edge_enabled) != len(edge_ids):
-            raise InputLengthDoesNotMatchError("Both edge_enabled and edge_ids must have the same length.")
-
-        # Condition 5: verify source_vertex_id is a valid vertex id
-        if not isinstance(source_vertex_id, int):
-            raise IDNotFoundError("Invalid source_vertex_id: must be an integer.")
-        if source_vertex_id not in vertex_ids:
-            raise IDNotFoundError(f"Invalid source_vertex_id: vertex {source_vertex_id} does not exist.")
 
         # Initiate graph with only the enabled edges
         self.graph = nx.Graph()
@@ -118,13 +91,9 @@ class GraphProcessor:
             if enabled:
                 self.graph.add_edge(vertex1, vertex2)
 
-        # Condition 6: verify the graph is fully connected
-        if not nx.is_connected(self.graph):
-            raise GraphNotFullyConnectedError("The graph is not fully connected.")
-
-        # Condition 7: verify the graph does not contain cycles
-        if not nx.is_tree(self.graph):
-            raise GraphCycleError("The graph contains one or more cycles.")
+        # Run remaining condition checks
+        self._condition_6()
+        self._condition_7()
 
         # Create 'self' object
         self.edge_ids = edge_ids
@@ -134,6 +103,59 @@ class GraphProcessor:
 
         # Create combined edge data to support find_alternative_edges function
         self.combined_edge_data = list(zip(edge_ids, edge_enabled, edge_vertex_id_pairs, strict=False))
+
+    # Condition 1: vertex_ids and edge_ids should be unique
+    def _condition_1(self, vertex_ids: list[int], edge_ids: list[int]) -> None:
+        # Condition 1.1: verify vertex_ids are unique
+        if len(set(vertex_ids)) != len(vertex_ids):
+            raise IDNotUniqueError("Entries in vertex_ids are not unique.")
+
+        # Condition 1.2: verify edge_ids are unique
+        if len(set(edge_ids)) != len(edge_ids):
+            raise IDNotUniqueError("Entries in edge_ids are not unique.")
+
+    # Condition 2: edge_vertex_id_pairs should have the same length as edge_ids
+    def _condition_2(self, edge_ids: list[int], edge_vertex_id_pairs: list[tuple[int, int]]) -> None:
+        if len(edge_vertex_id_pairs) != len(edge_ids):
+            raise InputLengthDoesNotMatchError("Both edge_vertex_id_pairs and edge_ids must have the same length.")
+
+    # Condition 3: edge_vertex_id_pairs should contain valid vertex ids
+    def _condition_3(self, vertex_ids: list[int],edge_vertex_id_pairs: list[tuple[int, int]]) -> None:
+        for vertex_id_pair in edge_vertex_id_pairs:
+            if not isinstance(vertex_id_pair, tuple) or len(vertex_id_pair) != 2:
+                raise IDNotFoundError("Invalid entry in edge_vertex_id_pairs: each " \
+                "entry must be a tuple of two vertex ids.")
+
+            vertex_id_1, vertex_id_2 = vertex_id_pair
+
+            if not isinstance(vertex_id_1, int) or not isinstance(vertex_id_2, int):
+                raise IDNotFoundError("Invalid entry in edge_vertex_id_pairs: each vertex id must be an integer.")
+
+            if vertex_id_1 not in vertex_ids or vertex_id_2 not in vertex_ids:
+                raise IDNotFoundError("Invalid entry in edge_vertex_id_pairs: one or more vertex ids do not exist.")
+
+    # Condition 4: edge_enabled should have the same length as edge_ids
+    def _condition_4(self, edge_ids: list[int], edge_enabled: list[bool]) -> None:
+        if len(edge_enabled) != len(edge_ids):
+            raise InputLengthDoesNotMatchError("Both edge_enabled and edge_ids must have the same length.")
+
+    # Condition 5: source_vertex_id should be a valid vertex id
+    def _condition_5(self, vertex_ids: list[int], source_vertex_id: int) -> None:
+        if not isinstance(source_vertex_id, int):
+            raise IDNotFoundError("Invalid source_vertex_id: must be an integer.")
+
+        if source_vertex_id not in vertex_ids:
+            raise IDNotFoundError(f"Invalid source_vertex_id: vertex {source_vertex_id} does not exist.")
+
+    # Condition 6: The graph should be fully connected
+    def _condition_6(self) -> None:
+        if not nx.is_connected(self.graph):
+            raise GraphNotFullyConnectedError("The graph is not fully connected.")
+
+    # Condition 7: The graph should not contain cycles
+    def _condition_7(self) -> None:
+        if not nx.is_tree(self.graph):
+            raise GraphCycleError("The graph contains one or more cycles.")
 
     def find_downstream_vertices(self, edge_id: int) -> list[int]:
         """
