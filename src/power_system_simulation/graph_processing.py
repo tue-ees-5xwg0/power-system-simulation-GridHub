@@ -34,6 +34,7 @@ class EdgeAlreadyDisabledError(Exception):
 
 
 class GraphProcessor:
+
     """
     This class processes a graph and provides two functions:
     1. find_downstream_vertices: given an edge id, return all the vertices which
@@ -45,6 +46,7 @@ class GraphProcessor:
        Returns a list of all alternative edges.
     """
 
+
     def __init__(
         self,
         vertex_ids: list[int],
@@ -53,6 +55,7 @@ class GraphProcessor:
         edge_enabled: list[bool],
         source_vertex_id: int,
     ) -> None:
+
         """
         This function initializes a graph processor object with an undirected graph.
         Only the edges which are enabled are taken into account.
@@ -75,6 +78,7 @@ class GraphProcessor:
             edge_enabled: list of bools indicating of an edge is enabled or not
             source_vertex_id: vertex id of the source in the graph
         """
+
         # Run the first 5 condition checks.
         self.validate_unique_ids(vertex_ids, edge_ids)
         self.validate_edge_pair_length(edge_ids, edge_vertex_id_pairs)
@@ -103,10 +107,12 @@ class GraphProcessor:
         # Create combined edge data to support find_alternative_edges function
         self.combined_edge_data = list(zip(edge_ids, edge_enabled, edge_vertex_id_pairs, strict=False))
 
+
     """
     Below are the helper functions to check the conditions for the input validity.
     Each function checks one condition and raises the corresponding error if the condition is not satisfied.
     """
+
 
     # Condition 1: vertex_ids and edge_ids should be unique
     def validate_unique_ids(self, vertex_ids: list[int], edge_ids: list[int]) -> None:
@@ -118,10 +124,12 @@ class GraphProcessor:
         if len(set(edge_ids)) != len(edge_ids):
             raise IDNotUniqueError("Entries in edge_ids are not unique.")
 
+
     # Condition 2: edge_vertex_id_pairs should have the same length as edge_ids
     def validate_edge_pair_length(self, edge_ids: list[int], edge_vertex_id_pairs: list[tuple[int, int]]) -> None:
         if len(edge_vertex_id_pairs) != len(edge_ids):
             raise InputLengthDoesNotMatchError("Both edge_vertex_id_pairs and edge_ids must have the same length.")
+
 
     # Condition 3: edge_vertex_id_pairs should contain valid vertex ids
     def validate_edge_vertex_ids(self, vertex_ids: list[int], edge_vertex_id_pairs: list[tuple[int, int]]) -> None:
@@ -139,10 +147,12 @@ class GraphProcessor:
             if vertex_id_1 not in vertex_ids or vertex_id_2 not in vertex_ids:
                 raise IDNotFoundError("Invalid entry in edge_vertex_id_pairs: one or more vertex ids do not exist.")
 
+
     # Condition 4: edge_enabled should have the same length as edge_ids
     def validate_edge_enabled_length(self, edge_ids: list[int], edge_enabled: list[bool]) -> None:
         if len(edge_enabled) != len(edge_ids):
             raise InputLengthDoesNotMatchError("Both edge_enabled and edge_ids must have the same length.")
+
 
     # Condition 5: source_vertex_id should be a valid vertex id
     def validate_id(self, ids: list[int], provided_id: int) -> None:
@@ -152,17 +162,21 @@ class GraphProcessor:
         if provided_id not in ids:
             raise IDNotFoundError(f"Invalid id: {provided_id} does not exist.")
 
+
     # Condition 6: The graph should be fully connected
     def validate_fully_connected(self) -> None:
         if not nx.is_connected(self.graph):
             raise GraphNotFullyConnectedError("The graph is not fully connected.")
+
 
     # Condition 7: The graph should not contain cycles
     def validate_no_cycles(self) -> None:
         if not nx.is_tree(self.graph):
             raise GraphCycleError("The graph contains one or more cycles.")
 
+
     def find_downstream_vertices(self, edge_id: int) -> list[int]:
+
         """
         This function returns all the vertices which are in the downstream of the given edge,
         with respect to the source vertex. Including the downstream vertex of the edge itself!
@@ -184,6 +198,7 @@ class GraphProcessor:
         Returns:
             A list of all downstream vertices.
         """
+
         # Check if the given edge_id exists
         self.validate_id(self.edge_ids, edge_id)
 
@@ -209,6 +224,7 @@ class GraphProcessor:
                 return list(component)
 
     def find_alternative_edges(self, disabled_edge_id: int) -> list[int]:
+
         """
         Given an enabled edge, this function performs the following analysis:
             If the edge is going to be disabled,
@@ -243,6 +259,7 @@ class GraphProcessor:
         Returns:
             A list of alternative edge ids.
         """
+
         # Check if disabled_edge_id is a valid edge id
         self.validate_id(self.edge_ids, disabled_edge_id)
 
