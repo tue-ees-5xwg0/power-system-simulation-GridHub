@@ -47,6 +47,7 @@ class GraphValidator:
         7. The graph should not contain cycles. (GraphCycleError)
     If one certain condition is not satisfied, the error in the parentheses is raised.
     """
+
     # Condition 1: vertex_ids and edge_ids should be unique
     @staticmethod
     def validate_unique_ids(vertex_ids: list[int], edge_ids: list[int]) -> None:
@@ -179,7 +180,6 @@ class GraphProcessor:
 
         # Create combined edge data to support find_alternative_edges function
         self.combined_edge_data = list(zip(edge_ids, edge_enabled, edge_vertex_id_pairs, strict=False))
-
 
     def find_downstream_vertices(self, edge_id: int) -> list[int]:
         """
