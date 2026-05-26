@@ -151,6 +151,7 @@ class GraphProcessor:
             edge_enabled: list of bools indicating of an edge is enabled or not
             source_vertex_id: vertex id of the source in the graph
         """
+
         # Run the first 5 condition checks.
         GraphValidator.validate_unique_ids(vertex_ids, edge_ids)
         GraphValidator.validate_edge_pair_length(edge_ids, edge_vertex_id_pairs)
@@ -202,6 +203,7 @@ class GraphProcessor:
         Returns:
             A list of all downstream vertices.
         """
+
         # Check if the given edge_id exists
         GraphValidator.validate_id(self.edge_ids, edge_id)
 
@@ -261,6 +263,7 @@ class GraphProcessor:
         Returns:
             A list of alternative edge ids.
         """
+
         # Check if disabled_edge_id is a valid edge id
         GraphValidator.validate_id(self.edge_ids, disabled_edge_id)
 
