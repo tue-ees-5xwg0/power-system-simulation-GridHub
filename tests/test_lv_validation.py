@@ -1,6 +1,7 @@
-import pytest
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
+import pytest
 from power_grid_model import ComponentType
 from power_grid_model.utils import json_deserialize
 from power_grid_model.validation import ValidationException
@@ -12,6 +13,7 @@ from power_system_simulation.lv_validation import (
     TopologyError,
     validate_lv_grid_data,
 )
+
 
 @pytest.fixture
 def valid_grid_data():
@@ -115,7 +117,8 @@ def test_missing_source(valid_grid_data, valid_profiles):
 
 
 def test_multiple_transformers(valid_grid_data, valid_profiles):
-    from power_grid_model import initialize_array, DatasetType
+    from power_grid_model import DatasetType, initialize_array
+
     extra_tf = initialize_array(DatasetType.input, ComponentType.transformer, 2)
     extra_tf[0] = valid_grid_data[ComponentType.transformer][0]
     extra_tf[1] = valid_grid_data[ComponentType.transformer][0]

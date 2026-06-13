@@ -41,9 +41,9 @@ def _build_graph_processor(input_data: dict) -> GraphProcessor:
     vertex_ids = [int(x) for x in nodes["id"]]
 
     edge_ids = [int(x) for x in lines["id"]] + [int(transformer["id"][0])]
-    edge_vertex_id_pairs = [
-        (int(fn), int(tn)) for fn, tn in zip(lines["from_node"], lines["to_node"], strict=True)
-    ] + [(int(transformer["from_node"][0]), int(transformer["to_node"][0]))]
+    edge_vertex_id_pairs = [(int(fn), int(tn)) for fn, tn in zip(lines["from_node"], lines["to_node"], strict=True)] + [
+        (int(transformer["from_node"][0]), int(transformer["to_node"][0]))
+    ]
     edge_enabled = [
         bool(fs == 1 and ts == 1) for fs, ts in zip(lines["from_status"], lines["to_status"], strict=True)
     ] + [bool(transformer["from_status"][0] == 1 and transformer["to_status"][0] == 1)]
@@ -135,11 +135,13 @@ def run_n1_analysis(
         max_flat_idx = int(np.argmax(loading))
         max_ts_idx, max_line_col = np.unravel_index(max_flat_idx, loading.shape)
 
-        rows.append({
-            "Alternative_Line_ID": int(alt_line_id),
-            "Max_Loading": float(loading[max_ts_idx, max_line_col]),
-            "Max_Loading_Line_ID": int(result_line_ids[max_line_col]),
-            "Max_Loading_Timestamp": timestamps[max_ts_idx],
-        })
+        rows.append(
+            {
+                "Alternative_Line_ID": int(alt_line_id),
+                "Max_Loading": float(loading[max_ts_idx, max_line_col]),
+                "Max_Loading_Line_ID": int(result_line_ids[max_line_col]),
+                "Max_Loading_Timestamp": timestamps[max_ts_idx],
+            }
+        )
 
     return pd.DataFrame(rows, columns=N1_COLUMNS)

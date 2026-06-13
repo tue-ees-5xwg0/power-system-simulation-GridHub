@@ -3,16 +3,21 @@ import numpy as np
 import pandas as pd
 from power_grid_model import ComponentType
 from power_grid_model.validation import assert_valid_input_data
+
 from power_system_simulation.grid_model import ProfileMismatchError
+
 
 class TopologyError(Exception):
     """Raised when the grid topology does not meet requirements."""
 
+
 class InvalidFeederError(Exception):
     """Raised when the provided feeder IDs are invalid."""
 
+
 class ComponentCountError(Exception):
     """Raised when the number of certain components is incorrect."""
+
 
 def _validate_pgm_and_components(input_data: dict) -> None:
     """Checks PGM input validity and required components count."""
@@ -58,9 +63,7 @@ def _validate_topology(input_data: dict) -> None:
         raise TopologyError("The grid contains cycles in the initial state.")
 
 
-def _validate_profile_matching(
-        active: pd.DataFrame, reactive: pd.DataFrame, ev: pd.DataFrame
-) -> None:
+def _validate_profile_matching(active: pd.DataFrame, reactive: pd.DataFrame, ev: pd.DataFrame) -> None:
     """Checks if timestamps and load IDs match across profiles."""
     if not active.index.equals(reactive.index) or not active.index.equals(ev.index):
         raise ProfileMismatchError("Profiles have mismatching timestamps.")
@@ -78,11 +81,11 @@ def _validate_load_ids(input_data: dict, active_profile: pd.DataFrame, ev_profil
 
 
 def validate_lv_grid_data(
-        input_data: dict,
-        lv_feeder_ids: list[int],
-        active_profile: pd.DataFrame,
-        reactive_profile: pd.DataFrame,
-        ev_profile: pd.DataFrame,
+    input_data: dict,
+    lv_feeder_ids: list[int],
+    active_profile: pd.DataFrame,
+    reactive_profile: pd.DataFrame,
+    ev_profile: pd.DataFrame,
 ) -> None:
     """Validates the input data for the LV grid analytics."""
     _validate_pgm_and_components(input_data)

@@ -51,16 +51,20 @@ def profiles():
     timestamps = pd.date_range("2025-01-01", periods=3, freq="h")
     load_ids = [12, 13, 14, 15]
 
-    p_values = np.array([
-        [2000.0, 3000.0, 2500.0, 1500.0],
-        [4000.0, 5000.0, 3500.0, 2500.0],
-        [3000.0, 4000.0, 3000.0, 2000.0],
-    ])
-    q_values = np.array([
-        [200.0, 300.0, 250.0, 150.0],
-        [400.0, 500.0, 350.0, 250.0],
-        [300.0, 400.0, 300.0, 200.0],
-    ])
+    p_values = np.array(
+        [
+            [2000.0, 3000.0, 2500.0, 1500.0],
+            [4000.0, 5000.0, 3500.0, 2500.0],
+            [3000.0, 4000.0, 3000.0, 2000.0],
+        ]
+    )
+    q_values = np.array(
+        [
+            [200.0, 300.0, 250.0, 150.0],
+            [400.0, 500.0, 350.0, 250.0],
+            [300.0, 400.0, 300.0, 200.0],
+        ]
+    )
 
     active = pd.DataFrame(p_values, index=timestamps, columns=load_ids)
     reactive = pd.DataFrame(q_values, index=timestamps, columns=load_ids)
