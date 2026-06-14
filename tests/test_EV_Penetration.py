@@ -6,12 +6,11 @@ import pytest
 from power_grid_model import ComponentType, DatasetType, LoadGenType, initialize_array
 
 from power_system_simulation.EV_Penetration import (
-    EVTimestampMismatchError,
     InvalidPenetrationLevelError,
-    NotEnoughEVProfilesError,
     assign_ev_penetration,
     map_houses_per_feeder,
 )
+from power_system_simulation.grid_model import ProfileMismatchError
 
 
 def _build_two_feeder_grid() -> dict:
@@ -160,7 +159,7 @@ def test_negative_penetration_rejection():
 
 def test_too_few_ev_profiles():
     """A pool with fewer columns than sym_loads must be rejected before the power flow."""
-    with pytest.raises(NotEnoughEVProfilesError):
+    with pytest.raises(ProfileMismatchError):
         assign_ev_penetration(
             _build_two_feeder_grid(),
             FEEDER_IDS,
@@ -175,7 +174,7 @@ def test_mismatched_ev_timestamps():
     wrong_time = _build_ev_pool()
     wrong_time.index = wrong_time.index + pd.Timedelta(weeks=1)
 
-    with pytest.raises(EVTimestampMismatchError):
+    with pytest.raises(ProfileMismatchError):
         assign_ev_penetration(
             _build_two_feeder_grid(),
             FEEDER_IDS,

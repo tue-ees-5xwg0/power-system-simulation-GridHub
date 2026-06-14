@@ -18,27 +18,11 @@ from power_system_simulation.grid_model import (
     create_batch_update,
     run_power_flow,
 )
-
-# TODO: uncomment once merged with LV validation branch
-# from power_system_simulation.validation import (
-#     validate_lv_grid_data,
-#     InvalidFeederError,
-#     ComponentCountError,
-#     TopologyError,
-# )
-# from power_system_simulation.grid_model import ProfileMismatchError
+from power_system_simulation.lv_validation import validate_lv_grid_data
 
 
 class InvalidPenetrationLevelError(ValueError):
     """Raised when penetration_level is outside [0, 1]."""
-
-
-class NotEnoughEVProfilesError(ValueError):
-    """Raised when the EV profile pool is smaller than the number of sym_loads."""
-
-
-class EVTimestampMismatchError(ValueError):
-    """Raised when EV profile timestamps do not match the load profile timestamps."""
 
 
 def build_graph(input_data: dict) -> GraphProcessor:
@@ -169,24 +153,13 @@ def assign_ev_penetration(
     if not 0.0 <= penetration_level <= 1.0:
         raise InvalidPenetrationLevelError(f"Penetration_level must be between 0 and 1, got {penetration_level}.")
 
-    # TODO: replace these two checks with validate_lv_grid_data() once merged with LV validation branch
-    n_sym_loads = len(active_load_profile.columns)
-    if len(ev_active_profile.columns) < n_sym_loads:
-        raise NotEnoughEVProfilesError(
-            f"Need at least {n_sym_loads} EV profiles, but only {len(ev_active_profile.columns)} were provided."
-        )
-
-    if not active_load_profile.index.equals(ev_active_profile.index):
-        raise EVTimestampMismatchError("EV charging profile timestamps do not match the load profile timestamps.")
-
-    # TODO: uncomment once merged with LV validation branch
-    # validate_lv_grid_data(
-    #     input_data,
-    #     feeder_ids,
-    #     active_load_profile,
-    #     reactive_load_profile,
-    #     ev_active_profile,
-    # )
+    validate_lv_grid_data(
+        input_data,
+        feeder_ids,
+        active_load_profile,
+        reactive_load_profile,
+        ev_active_profile,
+    )
 
     feeder_loads = map_houses_per_feeder(input_data, feeder_ids)
 
