@@ -25,40 +25,19 @@ class InvalidPenetrationLevelError(ValueError):
     """Raised when penetration_level is outside [0, 1]."""
 
 
-def build_graph(input_data: dict) -> GraphProcessor:
-    """Construct a GraphProcessor from a PGM input dataset.
-
-    Includes the MV/LV transformer and all lines as edges so the
-    GraphProcessor models the full grid topology from the MV source node
-    down through the transformer to the LV feeders.
-
-    The MV-side (from_node) of the transformer is used as the source vertex,
-    making downstream direction calculations relative to the grid root.
-
-    Args:
-        input_data: PGM input dataset dict with NumPy structured arrays.
-
-    Returns:
-        A fully validated GraphProcessor instance.
-
-    Raises:
-        GraphNotFullyConnectedError: if the enabled edges do not span all nodes.
-        GraphCycleError: if the enabled topology contains a cycle.
-    """
+def _build_graph_processor(input_data: dict) -> GraphProcessor:
+    """Build a GraphProcessor for the given PGM input dataset."""
     nodes = input_data[ComponentType.node]
     lines = input_data[ComponentType.line]
     transformer = input_data[ComponentType.transformer][0]
-    vertex_ids = [int(n) for n in nodes["id"]]
-    edge_ids = [int(transformer["id"])]
-    edge_vertex_id_pairs: list[tuple[int, int]]
+    source = input_data[ComponentType.source][0]
+
+    vertex_ids = [int(x) for x in nodes["id"]]
+    edge_ids = [int(transformer["id"])] + [int(x) for x in lines["id"]]
     edge_vertex_id_pairs = [(int(transformer["from_node"]), int(transformer["to_node"]))]
-    edge_enabled: list[bool]
-    edge_enabled = [bool(transformer["from_status"] and transformer["to_status"])]
-
-    edge_ids += [int(i) for i in lines["id"]]
-
     edge_vertex_id_pairs += [(int(fn), int(tn)) for fn, tn in zip(lines["from_node"], lines["to_node"], strict=False)]
 
+    edge_enabled = [bool(transformer["from_status"] and transformer["to_status"])]
     edge_enabled += [
         bool(int(fs) == 1 and int(ts) == 1) for fs, ts in zip(lines["from_status"], lines["to_status"], strict=False)
     ]
@@ -68,7 +47,7 @@ def build_graph(input_data: dict) -> GraphProcessor:
         edge_ids=edge_ids,
         edge_vertex_id_pairs=edge_vertex_id_pairs,
         edge_enabled=edge_enabled,
-        source_vertex_id=int(transformer["from_node"]),
+        source_vertex_id=int(source["node"]),
     )
 
 
@@ -78,8 +57,8 @@ def map_houses_per_feeder(
 ) -> dict[int, list[int]]:
     """Return a mapping from feeder line ID to the sym_load IDs downstream of it.
 
-    Uses the grid graph to find all nodes reachable from each feeder root,
-    then collects the sym_loads whose node is in that downstream set.
+    Uses the graph from the LV grid to identify which sym_loads are supplied by each
+    feeder starting at the transformer LV bus.
 
     Args:
         input_data: PGM input dataset dict.
@@ -89,7 +68,7 @@ def map_houses_per_feeder(
         Dict mapping each feeder line ID to a list of downstream sym_load IDs.
         Feeders with no downstream loads map to an empty list.
     """
-    graph_processor = build_graph(input_data)
+    graph_processor = _build_graph_processor(input_data)
 
     load_ids = input_data[ComponentType.sym_load]["id"].astype(int)
     load_nodes = input_data[ComponentType.sym_load]["node"].astype(int)
@@ -162,9 +141,8 @@ def assign_ev_penetration(
     )
 
     feeder_loads = map_houses_per_feeder(input_data, feeder_ids)
-
-    # floor() via int() is fine here because penetration_level and counts are non-negative
-    feeder_evs = int(penetration_level * len(active_load_profile.columns) / len(feeder_ids))
+    load_ids = input_data[ComponentType.sym_load]["id"].astype(int)
+    feeder_evs = int(np.floor(penetration_level * len(load_ids) / len(feeder_ids)))
 
     randomise = np.random.default_rng(random_seed)
 
@@ -173,10 +151,11 @@ def assign_ev_penetration(
         if (num_selected := min(feeder_evs, len(loads))) > 0:
             house_selection += randomise.choice(loads, size=num_selected, replace=False).tolist()
 
-    ev_columns = randomise.choice(ev_active_profile.columns, size=len(house_selection), replace=False)
+    ev_columns = randomise.choice(ev_active_profile.columns.to_numpy(), size=len(house_selection), replace=False)
 
     modified_active = active_load_profile.copy()
-    modified_active[house_selection] += ev_active_profile[ev_columns].to_numpy()
+    if house_selection:
+        modified_active.loc[:, house_selection] += ev_active_profile.loc[:, ev_columns].to_numpy()
 
     model = construct_model(input_data)
     update_data, timestamps = create_batch_update(modified_active, reactive_load_profile)
