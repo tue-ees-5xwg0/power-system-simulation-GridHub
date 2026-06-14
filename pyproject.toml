@@ -25,6 +25,7 @@ dependencies = [
   "pandas>=3.0,<4",
   "pyarrow>=24.0,<25",
   "networkx>=3.6,<4",
+  "pandas-stubs~=3.0.3",
 ]
 version = "0.1"
 
