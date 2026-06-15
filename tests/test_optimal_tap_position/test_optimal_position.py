@@ -1,26 +1,24 @@
-import json
 from pathlib import Path
 
 import pandas as pd
 import pytest
 
+from power_system_simulation.grid_model import load_input_data
 from power_system_simulation.optimal_tap_position.optimal_position import get_optimal_tap
 from power_system_simulation.optimal_tap_position.powerflow_calculation import run_powerflow_all_taps
 
-# ---- Paths (adapted to YOUR structure) ----
-TESTS_DIR = Path(__file__).resolve().parents[1]       # /tests
-DATA_DIR = TESTS_DIR / "data"                         # /tests/data
+# path to folder
+TEST_DIR = Path(__file__).resolve().parent
 
 
 def load_model():
-    model_path = TESTS_DIR / "lv_validation_test_data.json"
-    with open(model_path) as f:
-        return json.load(f)
+    model_path = TEST_DIR / "input_network_data.json"
+    return load_input_data(model_path)
 
 
 def load_profiles():
-    active = pd.read_parquet(DATA_DIR / "active_power_profiel.parquet")
-    reactive = pd.read_parquet(DATA_DIR / "reactive_power_profile.parquet")
+    active = pd.read_parquet(TEST_DIR / "active_power_profile.parquet")
+    reactive = pd.read_parquet(TEST_DIR / "reactive_power_profile.parquet")
     return active, reactive
 
 
@@ -38,7 +36,7 @@ def get_tap_positions():
     return [1, 2, 3, 4, 5]
 
 
-# ✅ REAL DATA TEST — LOSSES
+# test using real data for minimal energy loss criterion
 def test_get_optimal_tap_losses_real_data():
 
     model = load_model()
@@ -54,14 +52,24 @@ def test_get_optimal_tap_losses_real_data():
         reactive_profile
     )
 
-    # Compute expected manually
+    # compute expected result manually
     losses_per_tap = {}
+
     for tap, result in results_per_tap.items():
-        # ⚠️ If this fails, check the actual key in your result
-        losses_per_tap[tap] = result["losses"]
+        output_data = result["output_data"]
+        timestamps = result["timestamps"]
+
+        # use your aggregation function
+        from power_system_simulation.grid_model import aggregate_line_results
+
+        line_df = aggregate_line_results(output_data, timestamps)
+
+        total_loss = line_df["Total_Loss"].sum()
+        losses_per_tap[tap] = total_loss
 
     expected_best = min(losses_per_tap, key=losses_per_tap.get)
 
+    # run function
     computed_best = get_optimal_tap(
         model,
         tap_positions,
@@ -74,7 +82,7 @@ def test_get_optimal_tap_losses_real_data():
     assert computed_best == expected_best
 
 
-# ✅ REAL DATA TEST — VOLTAGE
+# test using real data for minimal voltage deviation criterion
 def test_get_optimal_tap_voltage_real_data():
 
     model = load_model()
@@ -91,9 +99,20 @@ def test_get_optimal_tap_voltage_real_data():
     )
 
     voltage_scores = {}
+
     for tap, result in results_per_tap.items():
-        # ⚠️ If this fails, check actual key name
-        voltage_scores[tap] = result["voltage_deviation"]
+        output_data = result["output_data"]
+        timestamps = result["timestamps"]
+
+        from power_system_simulation.grid_model import aggregate_voltage_results
+
+        voltage_df = aggregate_voltage_results(output_data, timestamps)
+
+        # deviation from 1 p.u.
+        deviation = ((voltage_df["Max_Voltage"] - 1).abs() +
+                     (voltage_df["Min_Voltage"] - 1).abs()).mean()
+
+        voltage_scores[tap] = deviation
 
     expected_best = min(voltage_scores, key=voltage_scores.get)
 
@@ -109,7 +128,7 @@ def test_get_optimal_tap_voltage_real_data():
     assert computed_best == expected_best
 
 
-# ✅ KEEP THIS TEST
+# invalid criterion should raise error
 def test_get_optimal_tap_invalid():
 
     with pytest.raises(ValueError):

@@ -1,75 +1,66 @@
+from pathlib import Path
+
 import pandas as pd
-from pytest import MonkeyPatch
 
-import power_system_simulation.optimal_tap_position.minimal_energy_loss as mel
+from power_system_simulation.grid_model import aggregate_line_results, load_input_data
+from power_system_simulation.optimal_tap_position.minimal_energy_loss import compute_best_tap_losses
+from power_system_simulation.optimal_tap_position.powerflow_calculation import run_powerflow_all_taps
+
+TEST_DIR = Path(__file__).resolve().parent
 
 
-def test_compute_best_tap_losses(monkeypatch: MonkeyPatch):
+def load_model():
+    return load_input_data(TEST_DIR / "input_network_data.json")
 
-    def fake_aggregate(output_data, timestamps):
-        return pd.DataFrame({
-            "Total_Loss": [1.0, 2.0]
-        })
 
-    monkeypatch.setattr(mel, "aggregate_line_results", fake_aggregate)
+def load_profiles():
+    active = pd.read_parquet(TEST_DIR / "active_power_profile.parquet")
+    reactive = pd.read_parquet(TEST_DIR / "reactive_power_profile.parquet")
+    return active, reactive
 
-    results_per_tap = {
-        0: {
-            "output_data": {"x": 1},
-            "timestamps": [0]
-        },
-        1: {
-            "output_data": {
-                "output_data": {"y": 2},
-                "timestamps": [0]
-            },
-            "timestamps": [999]
-        },
-        2: {
-            "output_data": {},
-            "timestamps": []
-        }
+
+def get_input_data():
+    return {
+        "mv_source_node": 0,
+        "lv_busbar": 1,
+        "transformer": 11,
+        "lv_feeders": [16, 20],
+        "source": 10
     }
 
-    result = mel.compute_best_tap_losses(results_per_tap)
 
-    assert result in results_per_tap
+def get_tap_positions():
+    return [1, 2, 3, 4, 5]
 
-def test_compute_best_tap_losses_nested(monkeypatch: MonkeyPatch):
 
-    def fake_aggregate(output_data, timestamps):
-        return pd.DataFrame({"Total_Loss": [5.0]})
+def test_minimal_energy_loss_real_data():
 
-    monkeypatch.setattr(mel, "aggregate_line_results", fake_aggregate)
+    model = load_model()
+    active_profile, reactive_profile = load_profiles()
+    input_data = get_input_data()
+    tap_positions = get_tap_positions()
 
-    results_per_tap = {
-        0: {
-            "output_data": {
-                "output_data": {"x": 1},
-                "timestamps": [0]
-            },
-            "timestamps": [999]
-        }
-    }
+    results_per_tap = run_powerflow_all_taps(
+        model,
+        tap_positions,
+        input_data,
+        active_profile,
+        reactive_profile
+    )
 
-    result = mel.compute_best_tap_losses(results_per_tap)
+    # compute expected manually
+    losses_per_tap = {}
 
-    assert result == 0
+    for tap, result in results_per_tap.items():
+        line_df = aggregate_line_results(
+            result["output_data"],
+            result["timestamps"]
+        )
 
-def test_compute_best_tap_losses_exception(monkeypatch):
+        losses_per_tap[tap] = line_df["Total_Loss"].sum()
 
-    def fake_aggregate(*args, **kwargs):
-        raise ValueError
+    expected_best = min(losses_per_tap, key=losses_per_tap.get)
 
-    monkeypatch.setattr(mel, "aggregate_line_results", fake_aggregate)
+    computed_best = compute_best_tap_losses(results_per_tap)
 
-    results_per_tap = {
-        0: {
-            "output_data": {"x": 1},
-            "timestamps": [0]
-        }
-    }
-
-    result = mel.compute_best_tap_losses(results_per_tap)
-
-    assert result == 0
+    assert computed_best == expected_best

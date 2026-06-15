@@ -12,6 +12,16 @@ def get_optimal_tap(model, tap_positions, criterion, input_data, active_profile,
         criterion (str):
             "losses"   minimal total energy loss of all the lines and the whole time period
             "voltage"  minimal (averaged) deviation of (max and min) p.u. node voltages with respect to 1 p.u.
+        power flow calculation inputs:
+            "model"     the grid model
+            "tap_positions" list of tap positions to evaluate
+            "input_data" dict with necessary input data for power flow calculation (e.g. source
+                            node, busbar, transformer, feeders, etc.)
+            "active_profile" pandas DataFrame with active power profile (index: timestamps, columns: node ids)
+            "reactive_profile" pandas DataFrame with reactive power profile (index: timestamps, columns
+
+    Returns:
+        best_tap (int): tap position that optimizes the criterion
     """
 
     # validate criterion

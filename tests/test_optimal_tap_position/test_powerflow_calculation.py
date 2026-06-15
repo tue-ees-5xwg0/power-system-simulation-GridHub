@@ -1,48 +1,97 @@
-def test_run_powerflow_all_taps(monkeypatch):
+from pathlib import Path
 
-    import power_system_simulation.optimal_tap_position.powerflow_calculation as pfc
+import pandas as pd
 
-    def fake_construct_model(input_data):
-        return "model"
+from power_system_simulation.grid_model import load_input_data
+from power_system_simulation.optimal_tap_position.powerflow_calculation import run_powerflow_all_taps
 
-    def fake_create_batch_update(active_profile=None, reactive_profile=None):
-        return {}, [0]
+TEST_DIR = Path(__file__).resolve().parent
 
-    def fake_run_power_flow(model=None, input_data=None, update_data=None):
-        return {}
 
-    monkeypatch.setattr(
-        "power_system_simulation.optimal_tap_position.powerflow_calculation.construct_model",
-        fake_construct_model,
-        raising=False
-    )
+def load_model():
+    return load_input_data(TEST_DIR / "input_network_data.json")
 
-    monkeypatch.setattr(
-        "power_system_simulation.optimal_tap_position.powerflow_calculation.create_batch_update",
-        fake_create_batch_update,
-        raising=False
-    )
 
-    monkeypatch.setattr(
-        "power_system_simulation.optimal_tap_position.powerflow_calculation.run_power_flow",
-        fake_run_power_flow,
-        raising=False
-    )
+def load_profiles():
+    active = pd.read_parquet(TEST_DIR / "active_power_profile.parquet")
+    reactive = pd.read_parquet(TEST_DIR / "reactive_power_profile.parquet")
+    return active, reactive
 
-    input_data = {
-        "transformer": {
-            "tap_pos": [0, 0]
-        }
+
+def get_input_data():
+    return {
+        "mv_source_node": 0,
+        "lv_busbar": 1,
+        "transformer": 11,
+        "lv_feeders": [16, 20],
+        "source": 10
     }
 
-    tap_positions = [-1, 0, 1]
 
-    results = pfc.run_powerflow_all_taps(
+def get_tap_positions():
+    return [1, 2, 3, 4, 5]
+
+
+def test_run_powerflow_all_taps_real_data():
+
+    model = load_model()
+    active_profile, reactive_profile = load_profiles()
+    input_data = get_input_data()
+    tap_positions = get_tap_positions()
+
+    results = run_powerflow_all_taps(
+        model,
+        tap_positions,
+        input_data,
+        active_profile,
+        reactive_profile
+    )
+
+    # basic checks
+    assert isinstance(results, dict)
+    assert len(results) == len(tap_positions)
+
+    for tap in tap_positions:
+        assert tap in results
+        assert "output_data" in results[tap]
+        assert "timestamps" in results[tap]
+
+        # basic checks
+        assert len(results[tap]["timestamps"]) == len(active_profile)
+
+def test_run_powerflow_all_taps_none_branch(monkeypatch):
+
+    import pandas as pd
+
+    # minimal valid profiles
+    df = pd.DataFrame([[1.0]], columns=[12])
+
+    input_data = {
+        "transformer": {"tap_pos": [0]}
+    }
+
+    tap_positions = [1]
+
+    # mock heavy functions
+    monkeypatch.setattr(
+        "power_system_simulation.optimal_tap_position.powerflow_calculation.construct_model",
+        lambda x: None
+    )
+    monkeypatch.setattr(
+        "power_system_simulation.optimal_tap_position.powerflow_calculation.run_power_flow",
+        lambda **kwargs: {}
+    )
+    monkeypatch.setattr(
+        "power_system_simulation.optimal_tap_position.powerflow_calculation.create_batch_update",
+        lambda **kwargs: ({}, [0])
+    )
+
+    results = run_powerflow_all_taps(
         model=None,
         tap_positions=tap_positions,
         input_data=input_data,
-        active_profile=None,
-        reactive_profile=None,
+        active_profile=df,
+        reactive_profile=df,
     )
 
-    assert len(results) == 3
+    assert 1 in results
