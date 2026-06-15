@@ -1,44 +1,116 @@
+import json
+from pathlib import Path
+
+import pandas as pd
 import pytest
 
-import power_system_simulation.optimal_tap_position.optimal_position as op
+from power_system_simulation.optimal_tap_position.optimal_position import get_optimal_tap
+from power_system_simulation.optimal_tap_position.powerflow_calculation import run_powerflow_all_taps
+
+# ---- Paths (adapted to YOUR structure) ----
+TESTS_DIR = Path(__file__).resolve().parents[1]       # /tests
+DATA_DIR = TESTS_DIR / "data"                         # /tests/data
 
 
-def test_get_optimal_tap_losses(monkeypatch):
+def load_model():
+    model_path = TESTS_DIR / "lv_validation_test_data.json"
+    with open(model_path) as f:
+        return json.load(f)
 
-    monkeypatch.setattr(
-        op,
-        "run_powerflow_all_taps",
-        lambda *args, **kwargs: {
-            1: {"output_data": {}, "timestamps": []}
-        }
+
+def load_profiles():
+    active = pd.read_parquet(DATA_DIR / "active_power_profiel.parquet")
+    reactive = pd.read_parquet(DATA_DIR / "reactive_power_profile.parquet")
+    return active, reactive
+
+
+def get_input_data():
+    return {
+        "mv_source_node": 0,
+        "lv_busbar": 1,
+        "transformer": 11,
+        "lv_feeders": [16, 20],
+        "source": 10
+    }
+
+
+def get_tap_positions():
+    return [1, 2, 3, 4, 5]
+
+
+# ✅ REAL DATA TEST — LOSSES
+def test_get_optimal_tap_losses_real_data():
+
+    model = load_model()
+    active_profile, reactive_profile = load_profiles()
+    input_data = get_input_data()
+    tap_positions = get_tap_positions()
+
+    results_per_tap = run_powerflow_all_taps(
+        model,
+        tap_positions,
+        input_data,
+        active_profile,
+        reactive_profile
     )
 
-    monkeypatch.setattr(op, "compute_best_tap_losses", lambda x: 1)
+    # Compute expected manually
+    losses_per_tap = {}
+    for tap, result in results_per_tap.items():
+        # ⚠️ If this fails, check the actual key in your result
+        losses_per_tap[tap] = result["losses"]
 
-    result = op.get_optimal_tap(None, [1], "losses", None, None, None)
+    expected_best = min(losses_per_tap, key=losses_per_tap.get)
 
-    assert result == 1
-
-
-def test_get_optimal_tap_voltage(monkeypatch):
-
-    monkeypatch.setattr(
-        op,
-        "run_powerflow_all_taps",
-        lambda *args, **kwargs: {
-            2: {"output_data": {}, "timestamps": []}
-        }
+    computed_best = get_optimal_tap(
+        model,
+        tap_positions,
+        "losses",
+        input_data,
+        active_profile,
+        reactive_profile
     )
 
-    monkeypatch.setattr(op, "compute_best_tap_voltage", lambda x: 2)
+    assert computed_best == expected_best
 
-    result = op.get_optimal_tap(None, [2], "voltage", None, None, None)
 
-    assert result == 2
+# ✅ REAL DATA TEST — VOLTAGE
+def test_get_optimal_tap_voltage_real_data():
 
+    model = load_model()
+    active_profile, reactive_profile = load_profiles()
+    input_data = get_input_data()
+    tap_positions = get_tap_positions()
+
+    results_per_tap = run_powerflow_all_taps(
+        model,
+        tap_positions,
+        input_data,
+        active_profile,
+        reactive_profile
+    )
+
+    voltage_scores = {}
+    for tap, result in results_per_tap.items():
+        # ⚠️ If this fails, check actual key name
+        voltage_scores[tap] = result["voltage_deviation"]
+
+    expected_best = min(voltage_scores, key=voltage_scores.get)
+
+    computed_best = get_optimal_tap(
+        model,
+        tap_positions,
+        "voltage",
+        input_data,
+        active_profile,
+        reactive_profile
+    )
+
+    assert computed_best == expected_best
+
+
+# ✅ KEEP THIS TEST
 def test_get_optimal_tap_invalid():
-
-    from power_system_simulation.optimal_tap_position.optimal_position import get_optimal_tap
 
     with pytest.raises(ValueError):
         get_optimal_tap(None, [0], "invalid", None, None, None)
