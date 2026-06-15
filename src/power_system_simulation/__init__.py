@@ -1,5 +1,10 @@
 """Power system simulation package."""
 
+from power_system_simulation.EV_Penetration import (
+    InvalidPenetrationLevelError,
+    assign_ev_penetration,
+    map_houses_per_feeder,
+)
 from power_system_simulation.grid_model import (
     ProfileMismatchError,
     aggregate_line_results,
@@ -29,6 +34,9 @@ __all__ = [
     "create_batch_update",
     "load_input_data",
     "run_power_flow",
+    "InvalidPenetrationLevelError",
+    "assign_ev_penetration",
+    "map_houses_per_feeder",
     "TopologyError",
     "InvalidFeederError",
     "ComponentCountError",
