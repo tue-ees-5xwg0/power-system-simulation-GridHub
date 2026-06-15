@@ -19,7 +19,6 @@ def run_powerflow_all_taps(model, tap_positions, input_data, active_profile, rea
     )
 
     for tap in tap_positions:
-
         # use deep copy to avoid mutating original input data across taps
         if model is not None:
             current_input_data = copy.deepcopy(model)

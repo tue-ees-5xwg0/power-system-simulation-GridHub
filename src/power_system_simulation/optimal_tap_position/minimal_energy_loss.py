@@ -10,7 +10,6 @@ def compute_best_tap_losses(results_per_tap):
     best_value = None
 
     for tap, data in results_per_tap.items():
-
         # load output data and timestamps
         output_data = data["output_data"]
         timestamps = data["timestamps"]

@@ -4,7 +4,6 @@ from .powerflow_calculation import run_powerflow_all_taps
 
 
 def get_optimal_tap(model, tap_positions, criterion, input_data, active_profile, reactive_profile):
-
     """
     Determine the optimal transformer tap position.
 

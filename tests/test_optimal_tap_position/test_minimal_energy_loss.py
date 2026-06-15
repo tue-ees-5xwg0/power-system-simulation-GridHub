@@ -20,13 +20,7 @@ def load_profiles():
 
 
 def get_input_data():
-    return {
-        "mv_source_node": 0,
-        "lv_busbar": 1,
-        "transformer": 11,
-        "lv_feeders": [16, 20],
-        "source": 10
-    }
+    return {"mv_source_node": 0, "lv_busbar": 1, "transformer": 11, "lv_feeders": [16, 20], "source": 10}
 
 
 def get_tap_positions():
@@ -34,28 +28,18 @@ def get_tap_positions():
 
 
 def test_minimal_energy_loss_real_data():
-
     model = load_model()
     active_profile, reactive_profile = load_profiles()
     input_data = get_input_data()
     tap_positions = get_tap_positions()
 
-    results_per_tap = run_powerflow_all_taps(
-        model,
-        tap_positions,
-        input_data,
-        active_profile,
-        reactive_profile
-    )
+    results_per_tap = run_powerflow_all_taps(model, tap_positions, input_data, active_profile, reactive_profile)
 
     # compute expected manually
     losses_per_tap = {}
 
     for tap, result in results_per_tap.items():
-        line_df = aggregate_line_results(
-            result["output_data"],
-            result["timestamps"]
-        )
+        line_df = aggregate_line_results(result["output_data"], result["timestamps"])
 
         losses_per_tap[tap] = line_df["Total_Loss"].sum()
 

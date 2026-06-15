@@ -19,13 +19,7 @@ def load_profiles():
 
 
 def get_input_data():
-    return {
-        "mv_source_node": 0,
-        "lv_busbar": 1,
-        "transformer": 11,
-        "lv_feeders": [16, 20],
-        "source": 10
-    }
+    return {"mv_source_node": 0, "lv_busbar": 1, "transformer": 11, "lv_feeders": [16, 20], "source": 10}
 
 
 def get_tap_positions():
@@ -33,19 +27,12 @@ def get_tap_positions():
 
 
 def test_run_powerflow_all_taps_real_data():
-
     model = load_model()
     active_profile, reactive_profile = load_profiles()
     input_data = get_input_data()
     tap_positions = get_tap_positions()
 
-    results = run_powerflow_all_taps(
-        model,
-        tap_positions,
-        input_data,
-        active_profile,
-        reactive_profile
-    )
+    results = run_powerflow_all_taps(model, tap_positions, input_data, active_profile, reactive_profile)
 
     # basic checks
     assert isinstance(results, dict)
@@ -59,31 +46,27 @@ def test_run_powerflow_all_taps_real_data():
         # basic checks
         assert len(results[tap]["timestamps"]) == len(active_profile)
 
-def test_run_powerflow_all_taps_none_branch(monkeypatch):
 
+def test_run_powerflow_all_taps_none_branch(monkeypatch):
     import pandas as pd
 
     # minimal valid profiles
     df = pd.DataFrame([[1.0]], columns=[12])
 
-    input_data = {
-        "transformer": {"tap_pos": [0]}
-    }
+    input_data = {"transformer": {"tap_pos": [0]}}
 
     tap_positions = [1]
 
     # mock heavy functions
     monkeypatch.setattr(
-        "power_system_simulation.optimal_tap_position.powerflow_calculation.construct_model",
-        lambda x: None
+        "power_system_simulation.optimal_tap_position.powerflow_calculation.construct_model", lambda x: None
     )
     monkeypatch.setattr(
-        "power_system_simulation.optimal_tap_position.powerflow_calculation.run_power_flow",
-        lambda **kwargs: {}
+        "power_system_simulation.optimal_tap_position.powerflow_calculation.run_power_flow", lambda **kwargs: {}
     )
     monkeypatch.setattr(
         "power_system_simulation.optimal_tap_position.powerflow_calculation.create_batch_update",
-        lambda **kwargs: ({}, [0])
+        lambda **kwargs: ({}, [0]),
     )
 
     results = run_powerflow_all_taps(

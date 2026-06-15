@@ -16,7 +16,6 @@ def compute_best_tap_voltage(results_per_tap):
     best_value = None
 
     for tap, result in results_per_tap.items():
-
         # load output data and timestamps
         output_data = result["output_data"]
         timestamps = result["timestamps"]
@@ -25,10 +24,7 @@ def compute_best_tap_voltage(results_per_tap):
         df = aggregate_voltage_results(output_data, timestamps)
 
         # compute deviation from 1.0 pu
-        avg_deviation = (
-            (df["Max_Voltage"] - 1).abs() +
-            (df["Min_Voltage"] - 1).abs()
-        ).mean()
+        avg_deviation = ((df["Max_Voltage"] - 1).abs() + (df["Min_Voltage"] - 1).abs()).mean()
 
         # select best tap
         if best_value is None or avg_deviation < best_value:
