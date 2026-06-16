@@ -18,13 +18,18 @@ Modular and reusable design for scalable workflows
 Installation:
 This project uses https://docs.astral.sh/uv/ for dependency management.
 In the root of the repository, sync all dependencies using:
+```
     uv sync
+```
 
 After installation, run the tests:
+```
     uv run pytest
+```
 
 Quick Start:
 
+```
 from power_system_simulation.grid_model import (
     load_input_data,
     construct_model,
@@ -47,6 +52,8 @@ output = run_power_flow(model, input_data, update_data)
 
 # Aggregate results
 voltage_results = aggregate_voltage_results(output, timestamps)
+
+```
 
 Modules:
 graph_processing:
@@ -93,21 +100,27 @@ Automate selection of optimal tap setting
 Code style and quality check:
 This project uses https://docs.astral.sh/ruff/ for linting and formatting.
 Check and automatically fix code issues:
-    uv run ruff check --fix 
+```
+    uv run ruff check --fix
+```
 
 Format your code:
+```
     uv run ruff format
+```
 
 Working with Jupyter Notebooks:
 Jupyter notebooks in the example/ folder can be opened directly in VS Code. The project includes ipykernel in the development dependencies, allowing VS Code to run notebook cells using the .venv environment.
 
 Folder structure of the repository:
+```
 
 ./src/power_system_simulation – main package source code
 ./tests – test suite
 ./example – example notebook for demonstration
 ./.vscode – VS Code configuration
 ./.github/workflows – CI configuration
+```
 
 
 Example Use Cases:
